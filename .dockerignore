@@ -1,0 +1,53 @@
+# Large upload directories - use external storage
+Admin-Upload/
+User-Upload/
+uploads/
+Original-Files/
+temp-redeem/
+Category-Logos/
+
+# Test and backup directories
+test-data/
+test-output/
+postgres-backup/
+
+# Development files
+*.log
+npm-debug.log*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Dependencies (will be reinstalled)
+node_modules/
+
+# Build cache
+.cache/
+dist/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.so
+
+# Replit specific
+.replit
+replit.nix
+.upm/
+.config/

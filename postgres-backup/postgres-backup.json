@@ -1,0 +1,311 @@
+{
+  "users": [
+    {
+      "id": "btB-VJ",
+      "email": "btB-VJ@example.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "profileImageUrl": null,
+      "role": "user",
+      "createdAt": "2025-10-24T19:40:46.966Z",
+      "updatedAt": "2025-10-24T19:40:46.966Z"
+    },
+    {
+      "id": "viewer-123",
+      "email": "viewer@example.com",
+      "firstName": "Viewer",
+      "lastName": "Test",
+      "profileImageUrl": null,
+      "role": "user",
+      "createdAt": "2025-10-25T04:27:54.912Z",
+      "updatedAt": "2025-10-25T04:27:54.912Z"
+    },
+    {
+      "id": "test-upload-user",
+      "email": "upload@example.com",
+      "firstName": "Test",
+      "lastName": "User",
+      "profileImageUrl": null,
+      "role": "user",
+      "createdAt": "2025-10-25T04:47:18.101Z",
+      "updatedAt": "2025-10-25T04:47:18.101Z"
+    },
+    {
+      "id": "47369284",
+      "email": "yifeng260688@gmail.com",
+      "firstName": "YI",
+      "lastName": "FENG",
+      "profileImageUrl": null,
+      "role": "admin",
+      "createdAt": "2025-10-25T04:06:48.664Z",
+      "updatedAt": "2025-10-28T04:09:20.178Z"
+    },
+    {
+      "id": "LAuq-u",
+      "email": "LAuq-u@example.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "profileImageUrl": null,
+      "role": "user",
+      "createdAt": "2025-10-24T19:35:22.912Z",
+      "updatedAt": "2025-10-28T06:23:39.362Z"
+    },
+    {
+      "id": "test-user-upload-001",
+      "email": "test-upload@example.com",
+      "firstName": "Test",
+      "lastName": "Upload",
+      "profileImageUrl": null,
+      "role": "user",
+      "createdAt": "2025-10-29T23:35:01.670Z",
+      "updatedAt": "2025-10-29T23:35:01.670Z"
+    }
+  ],
+  "documents": [
+    {
+      "id": "b6e0b3e0-ca46-413d-8a5b-6ad94e759ab8",
+      "title": "Báo cáo Tài chính Doanh nghiệp Q4 2024",
+      "description": "Phân tích chi tiết về tình hình tài chính doanh nghiệp trong quý 4 năm 2024. Bao gồm báo cáo thu chi, lợi nhuận, và dự báo cho năm tiếp theo.",
+      "category": "Tài chính",
+      "pageCount": 45,
+      "coverImageUrl": "/attached_assets/generated_images/Financial_document_cover_navy_6a14393a.png",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      "drmLicenseUrl": null,
+      "viewCount": 0,
+      "createdAt": "2025-10-24T19:30:03.369Z",
+      "updatedAt": "2025-10-24T19:30:03.369Z"
+    },
+    {
+      "id": "f0a5c1f4-7d03-4a1d-96e9-4a438b1de44e",
+      "title": "Chiến lược Marketing Số 2025",
+      "description": "Hướng dẫn toàn diện về các chiến lược marketing số hiện đại, bao gồm SEO, social media, content marketing và email campaigns.",
+      "category": "Marketing",
+      "pageCount": 67,
+      "coverImageUrl": "/attached_assets/generated_images/Business_document_cover_blue_a6330d07.png",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      "drmLicenseUrl": null,
+      "viewCount": 0,
+      "createdAt": "2025-10-24T19:30:03.419Z",
+      "updatedAt": "2025-10-24T19:30:03.419Z"
+    },
+    {
+      "id": "dd840700-72c5-4790-b33a-2aa0206228f9",
+      "title": "Kỹ thuật Lập trình Web Hiện đại",
+      "description": "Khóa học về lập trình web với React, Node.js, và TypeScript. Từ cơ bản đến nâng cao với các ví dụ thực tế và best practices.",
+      "category": "Công nghệ",
+      "pageCount": 120,
+      "coverImageUrl": "/attached_assets/generated_images/Technology_document_cover_green_3f0ac92b.png",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+      "drmLicenseUrl": null,
+      "viewCount": 0,
+      "createdAt": "2025-10-24T19:30:03.456Z",
+      "updatedAt": "2025-10-24T19:30:03.456Z"
+    },
+    {
+      "id": "5b416010-1a83-4d84-b52d-a50923895902",
+      "title": "Quản trị Dự án Agile & Scrum",
+      "description": "Hướng dẫn chi tiết về phương pháp quản trị dự án Agile và Scrum framework. Phù hợp cho project managers và team leaders.",
+      "category": "Quản lý",
+      "pageCount": 95,
+      "coverImageUrl": "/attached_assets/generated_images/Business_document_cover_blue_a6330d07.png",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+      "drmLicenseUrl": null,
+      "viewCount": 0,
+      "createdAt": "2025-10-24T19:30:03.547Z",
+      "updatedAt": "2025-10-24T19:30:03.547Z"
+    },
+    {
+      "id": "f41b75f4-a4e7-47d3-aca8-feb21b2c9168",
+      "title": "Phân tích Dữ liệu với Python",
+      "description": "Khóa học toàn diện về phân tích dữ liệu sử dụng Python, Pandas, NumPy và Matplotlib. Bao gồm machine learning cơ bản.",
+      "category": "Công nghệ",
+      "pageCount": 156,
+      "coverImageUrl": "/attached_assets/generated_images/Technology_document_cover_green_3f0ac92b.png",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+      "drmLicenseUrl": null,
+      "viewCount": 0,
+      "createdAt": "2025-10-24T19:30:03.588Z",
+      "updatedAt": "2025-10-24T19:30:03.588Z"
+    },
+    {
+      "id": "0815fade-889e-4bd4-bdce-67395e05f6f0",
+      "title": "Kế hoạch Kinh doanh Startup",
+      "description": "Template và hướng dẫn chi tiết để xây dựng business plan cho startup. Bao gồm market research, financial projections và pitch deck.",
+      "category": "Kinh doanh",
+      "pageCount": 72,
+      "coverImageUrl": "/attached_assets/generated_images/Financial_document_cover_navy_6a14393a.png",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+      "drmLicenseUrl": null,
+      "viewCount": 0,
+      "createdAt": "2025-10-24T19:30:03.630Z",
+      "updatedAt": "2025-10-24T19:30:03.630Z"
+    },
+    {
+      "id": "0827b29c-fbc8-4459-b604-36a61e771fd8",
+      "title": "Thiết kế UI/UX Chuyên nghiệp",
+      "description": "Nguyên tắc và thực hành thiết kế UI/UX hiện đại. Bao gồm user research, wireframing, prototyping và usability testing.",
+      "category": "Thiết kế",
+      "pageCount": 134,
+      "coverImageUrl": "/attached_assets/generated_images/Education_document_cover_orange_62237e7d.png",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+      "drmLicenseUrl": null,
+      "viewCount": 0,
+      "createdAt": "2025-10-24T19:30:03.675Z",
+      "updatedAt": "2025-10-24T19:30:03.675Z"
+    },
+    {
+      "id": "5eebc831-ba11-4938-a817-87da4d69a322",
+      "title": "Kỹ năng Giao tiếp Hiệu quả",
+      "description": "Phát triển kỹ năng giao tiếp trong công việc và cuộc sống. Bao gồm presentation skills, negotiation và conflict resolution.",
+      "category": "Kỹ năng mềm",
+      "pageCount": 58,
+      "coverImageUrl": "/attached_assets/generated_images/Business_document_cover_blue_a6330d07.png",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
+      "drmLicenseUrl": null,
+      "viewCount": 0,
+      "createdAt": "2025-10-24T19:30:03.715Z",
+      "updatedAt": "2025-10-24T19:30:03.715Z"
+    },
+    {
+      "id": "0f38fffb-ef71-47ba-93c8-b6407739c67e",
+      "title": "Đầu tư Chứng khoán Cơ bản",
+      "description": "Hướng dẫn từ A-Z về đầu tư chứng khoán cho người mới bắt đầu. Bao gồm phân tích cơ bản, phân tích kỹ thuật và quản lý rủi ro.",
+      "category": "Tài chính",
+      "pageCount": 103,
+      "coverImageUrl": "/attached_assets/generated_images/Financial_document_cover_navy_6a14393a.png",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+      "drmLicenseUrl": null,
+      "viewCount": 0,
+      "createdAt": "2025-10-24T19:30:03.761Z",
+      "updatedAt": "2025-10-24T19:30:03.761Z"
+    },
+    {
+      "id": "c2d36cd2-9611-4600-ae1c-e57322c4a10e",
+      "title": "Cloud Computing với AWS",
+      "description": "Khóa học về Amazon Web Services, bao gồm EC2, S3, RDS, Lambda và các dịch vụ cloud computing phổ biến khác.",
+      "category": "Công nghệ",
+      "pageCount": 178,
+      "coverImageUrl": "/attached_assets/generated_images/Technology_document_cover_green_3f0ac92b.png",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
+      "drmLicenseUrl": null,
+      "viewCount": 0,
+      "createdAt": "2025-10-24T19:30:03.806Z",
+      "updatedAt": "2025-10-24T19:30:03.806Z"
+    },
+    {
+      "id": "04ee662e-18bf-4727-b1f1-9e7558e669d2",
+      "title": "Tâm lý học Tổ chức",
+      "description": "Nghiên cứu về hành vi con người trong môi trường tổ chức. Bao gồm motivation, leadership và organizational culture.",
+      "category": "Giáo dục",
+      "pageCount": 91,
+      "coverImageUrl": "/attached_assets/generated_images/Education_document_cover_orange_62237e7d.png",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
+      "drmLicenseUrl": null,
+      "viewCount": 2,
+      "createdAt": "2025-10-24T19:30:03.845Z",
+      "updatedAt": "2025-10-24T19:30:03.845Z"
+    },
+    {
+      "id": "551a5138-7d39-483a-9ab9-1d8cf049bb5d",
+      "title": "Phương pháp Giảng dạy Hiệu quả",
+      "description": "Tài liệu hướng dẫn các phương pháp giảng dạy hiệu quả cho giáo viên, bao gồm kỹ thuật tương tác, đánh giá học sinh và quản lý lớp học.",
+      "category": "Giáo dục",
+      "pageCount": 88,
+      "coverImageUrl": "/attached_assets/generated_images/Education_document_cover_orange_62237e7d.png",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+      "drmLicenseUrl": null,
+      "viewCount": 1,
+      "createdAt": "2025-10-24T19:30:03.502Z",
+      "updatedAt": "2025-10-24T19:30:03.502Z"
+    },
+    {
+      "id": "9de21472-6ac7-4818-b24d-5570b95501ab",
+      "title": "Final Test Doc",
+      "description": "Testing full form workflow with category fix",
+      "category": "Thiết kế",
+      "pageCount": 88,
+      "coverImageUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      "drmLicenseUrl": "",
+      "viewCount": 7,
+      "createdAt": "2025-10-24T21:01:04.399Z",
+      "updatedAt": "2025-10-24T21:02:58.686Z"
+    },
+    {
+      "id": "ed60e8bc-2567-4036-8003-991441d83789",
+      "title": "Test Document",
+      "description": "This is a test document for automation",
+      "category": "Công nghệ",
+      "pageCount": 50,
+      "coverImageUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      "drmLicenseUrl": "",
+      "viewCount": 1,
+      "createdAt": "2025-10-24T20:52:35.111Z",
+      "updatedAt": "2025-10-24T20:52:35.111Z"
+    },
+    {
+      "id": "cc54813a-91fb-405e-af72-cbf1301af441",
+      "title": "Form Test Doc",
+      "description": "Testing form prefill bug fix",
+      "category": "Công nghệ",
+      "pageCount": 75,
+      "coverImageUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      "drmLicenseUrl": "",
+      "viewCount": 1,
+      "createdAt": "2025-10-24T20:56:47.087Z",
+      "updatedAt": "2025-10-24T20:56:47.087Z"
+    }
+  ],
+  "favorites": [
+    {
+      "id": "ce3abbba-9e12-4a59-bf8b-4f329f873862",
+      "userId": "LAuq-u",
+      "documentId": "04ee662e-18bf-4727-b1f1-9e7558e669d2",
+      "createdAt": "2025-10-24T19:37:29.771Z"
+    }
+  ],
+  "tags": [
+    {
+      "id": "f15ed64e-f4c7-4447-889f-c81d2f933aff",
+      "name": "React",
+      "createdAt": "2025-10-24T21:17:36.723Z"
+    },
+    {
+      "id": "7dbea23d-9ab0-4b66-aae7-0abe35db09a9",
+      "name": "TypeScript",
+      "createdAt": "2025-10-24T21:18:13.986Z"
+    }
+  ],
+  "documentTags": [],
+  "userUploads": [
+    {
+      "id": "66c70627-79a8-4ae6-91bf-94a7505cd029",
+      "userId": "test-upload-user",
+      "slot": 2,
+      "fileName": "test2.pdf",
+      "fileType": "application/pdf",
+      "filePath": "/home/runner/workspace/User-Upload/test-upload-user_1761367722249.pdf",
+      "fileSize": 86,
+      "approvalStatus": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "pipelineStatus": "not_started",
+      "pipelineStartedAt": null,
+      "pipelineCompletedAt": null,
+      "uploadedAt": "2025-10-25T04:48:42.472Z"
+    }
+  ],
+  "adminUploads": [],
+  "exportedAt": "2025-11-01T22:50:41.928Z",
+  "counts": {
+    "users": 6,
+    "documents": 15,
+    "favorites": 1,
+    "tags": 2,
+    "documentTags": 0,
+    "userUploads": 1,
+    "adminUploads": 0
+  }
+}

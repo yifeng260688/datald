@@ -1,0 +1,298 @@
+import pandas as pd
+import numpy as np
+import os
+from collections import Counter
+
+# ==============================================================================
+# CẤU HÌNH HỆ THỐNG PHÂN TÍCH
+# ==============================================================================
+CONFIG = {
+    "DATA_FILE_PATH": './data/game_slot_api_history.xlsx',
+    "OUTPUT_REPORT_PATH": './analysis_master_report.xlsx',
+    
+    "BIG_WIN_MULTIPLIER": 50,       
+    "LOOKBACK_WINDOW": 50,          
+    
+    # --- CẬP NHẬT THEO YÊU CẦU ---
+    # Ngưỡng xác định "Dày đặc" ở các hàng dưới (H2-H5)
+    # Chỉ báo cáo nếu có từ 12 biểu tượng giống nhau trở lên
+    "DENSE_THRESHOLD": 12, 
+    
+    "TARGET_MULTIPLIERS": [2, 3, 4, 5]
+}
+
+# --- QUY ĐỊNH VỊ TRÍ ẨN CỐ ĐỊNH ---
+FIXED_HIDDEN_INDICES = {0, 1, 6, 7, 8, 13, 14, 15, 20, 21, 22, 27, 28, 29, 34}
+
+SYMBOL_NAMES = {
+    5546: "SCATTER", 5536: "WILD", 5537: "Phát Tài (Gold)", 5538: "Hồng Trung",
+    5539: "Bạch Bản", 5540: "Bát Vạn", 5541: "Ngũ Thông", 5542: "Lục Sách",
+    5543: "Tam Thông", 5544: "Nhị Thông", 5545: "Nhị Sách"
+}
+
+def get_symbol_name(sid):
+    return SYMBOL_NAMES.get(sid, f"ID_{sid}")
+
+# ==============================================================================
+# 1. TẢI VÀ CHUẨN BỊ DỮ LIỆU
+# ==============================================================================
+def load_and_prep_data():
+    print("\n[1/5] ĐANG TẢI VÀ XỬ LÝ DỮ LIỆU GỐC...")
+    if not os.path.exists(CONFIG["DATA_FILE_PATH"]):
+        print(f"❌ Lỗi: Không tìm thấy file '{CONFIG['DATA_FILE_PATH']}'")
+        return None
+    
+    df = pd.read_excel(CONFIG["DATA_FILE_PATH"])
+    
+    cols_to_numeric = ['bet_amount', 'total_win', 'multiplier', 'win_loss_amount', 'balance_after_spin']
+    for col in cols_to_numeric:
+        df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+
+    df['effective_bet'] = df['bet_amount'].replace(0, np.nan).ffill().fillna(1)
+    df['calc_multiplier'] = df['total_win'] / df['effective_bet']
+    df = df.sort_index().reset_index(drop=True)
+    
+    print(f"-> Tổng số dòng dữ liệu: {len(df)}")
+    return df
+
+# ==============================================================================
+# 2. TRÍCH XUẤT DỮ LIỆU MẪU
+# ==============================================================================
+def extract_comparative_data(df):
+    print("[2/5] ĐANG TRÍCH XUẤT DỮ LIỆU MẪU (WINDOW: 50)...")
+    
+    big_win_indices = df[df['calc_multiplier'] >= CONFIG['BIG_WIN_MULTIPLIER']].index
+    
+    low_bal_df = df.sort_values('balance_after_spin').head(200)
+    low_bal_indices = []
+    seen_indices = set()
+    
+    for idx in low_bal_df.index:
+        is_near = False
+        for seen in seen_indices:
+            if abs(idx - seen) < CONFIG['LOOKBACK_WINDOW']: 
+                is_near = True
+                break
+        if not is_near:
+            low_bal_indices.append(idx)
+            seen_indices.add(idx)
+            if len(low_bal_indices) >= 30: break
+
+    def get_data_window(indices, label):
+        data_list = []
+        for idx in indices:
+            start = max(0, idx - CONFIG['LOOKBACK_WINDOW'])
+            end = idx 
+            if start >= end: continue
+            
+            subset = df.iloc[start:end].copy()
+            subset['Xu_Huong'] = label
+            subset['Event_Ticket_ID'] = df.iloc[idx]['ticket_id']
+            data_list.append(subset)
+        return pd.concat(data_list) if data_list else pd.DataFrame()
+
+    df_pre_bigwin = get_data_window(big_win_indices, "Trước Thắng Lớn")
+    df_pre_lose = get_data_window(low_bal_indices, "Trước Thua Sạch")
+    
+    print(f"-> Tìm thấy {len(big_win_indices)} sự kiện Big Win.")
+    print(f"-> Tìm thấy {len(low_bal_indices)} sự kiện Đáy Tài Khoản.")
+    
+    return df_pre_bigwin, df_pre_lose
+
+# ==============================================================================
+# 3. HÀM PARSE MA TRẬN CHUẨN
+# ==============================================================================
+def parse_full_matrix(result_str):
+    if not isinstance(result_str, str): return []
+    parts = result_str.split(',')
+    if len(parts) < 35: return [] 
+    
+    matrix_data = []
+    for i, part in enumerate(parts):
+        if i >= 35: break
+        try:
+            elems = part.split(':')
+            sid = int(elems[0])
+            
+            z_raw = elems[3] if len(elems) > 3 else '0'
+            z_val = str(z_raw).strip().upper()
+            if z_val == '' or z_val == '0': z_val = '0'
+            
+            is_gold = True if len(elems) > 2 and elems[2] == '2' else False
+            
+            # Logic ẩn/hiện
+            is_structurally_hidden = i in FIXED_HIDDEN_INDICES
+            is_visible = (not is_structurally_hidden) and (z_val == '0')
+            
+            matrix_data.append({
+                'index': i,
+                'id': sid, 
+                'z': z_val, 
+                'gold': is_gold,
+                'is_visible': is_visible,
+                'is_structurally_hidden': is_structurally_hidden
+            })
+        except:
+            matrix_data.append({'index': i, 'id': 0, 'z': '0', 'gold': False, 'is_visible': False, 'is_structurally_hidden': True})
+    return matrix_data
+
+# ==============================================================================
+# 4. CÁC HÀM PHÂN TÍCH CHI TIẾT
+# ==============================================================================
+
+def analyze_blocked_wins(df_combined):
+    print(f"   + Phân tích Kèo Bị Chặn (Ngưỡng H2-H5 >= {CONFIG['DENSE_THRESHOLD']})...")
+    blocked_stats = []
+    
+    for idx, row in df_combined.iterrows():
+        matrix = parse_full_matrix(row['result_matrix'])
+        if not matrix: continue
+        
+        # Tách Hàng 1 (Index 0-6) và Vùng Dưới (Index 7-34)
+        row1 = matrix[0:7]
+        lower_region = matrix[7:]
+        
+        # Đếm symbol CHỈ Ở VÙNG HIỂN THỊ của các hàng dưới
+        # Lưu ý: Vùng dưới có 28 ô, nhưng bị ẩn cấu trúc khá nhiều.
+        # Code sẽ chỉ đếm những ô thực sự hiển thị.
+        visible_lower_ids = [x['id'] for x in lower_region if x['is_visible'] and x['id'] > 0]
+        counts = Counter(visible_lower_ids)
+        
+        for sid, count in counts.items():
+            # YÊU CẦU MỚI: Số lượng ở dưới phải >= 12
+            if count >= CONFIG['DENSE_THRESHOLD']:
+                
+                # Kiểm tra Hàng 1
+                # 1. Có Symbol đó ở Hàng 1 nhưng bị Ẩn (Do cấu trúc map HOẶC do Z!=0)
+                hidden_in_row1 = [x for x in row1 if x['id'] == sid and not x['is_visible']]
+                
+                # 2. Có Symbol đó ở Hàng 1 và Hiện (Nối cầu)
+                visible_in_row1 = [x for x in row1 if x['id'] == sid and x['is_visible']]
+                
+                # Điều kiện chặn: Có ở dưới rất nhiều (>=12), nhưng ở trên không có đường nối
+                if len(hidden_in_row1) > 0 and len(visible_in_row1) == 0:
+                    
+                    reasons = []
+                    for x in hidden_in_row1:
+                        if x['is_structurally_hidden']: reasons.append(f"Vị trí {x['index']} (Map ẩn)")
+                        elif x['z'] != '0': reasons.append(f"Vị trí {x['index']} (Z={x['z']})")
+                    
+                    reason_str = "; ".join(reasons)
+
+                    blocked_stats.append({
+                        "Xu Hướng": row['Xu_Huong'],
+                        "Ticket ID": row['ticket_id'],
+                        "Symbol Bị Chặn": f"{sid} ({get_symbol_name(sid)})",
+                        "Số Lượng Dưới (H2-H5)": count,
+                        "Chi Tiết Chặn": reason_str
+                    })
+
+    return pd.DataFrame(blocked_stats)
+
+def analyze_fake_wins(df_combined):
+    print("   + Phân tích Thắng Ảo...")
+    dense_data = []
+    for idx, row in df_combined.iterrows():
+        matrix = parse_full_matrix(row['result_matrix'])
+        if not matrix: continue
+        
+        visible_ids = [x['id'] for x in matrix if x['is_visible'] and x['id'] > 0]
+        counts = Counter(visible_ids)
+        if not counts: continue
+        
+        max_sym, max_c = counts.most_common(1)[0]
+        if max_c >= 6:
+            ratio = row['calc_multiplier']
+            win_type = "THẮNG ẢO (Fake)" if ratio < 5 else "KHỞI ĐẦU TỐT (Real)"
+            implication = "-> Dấu hiệu HÚT TIỀN" if ratio < 5 else "-> Dấu hiệu NỔ"
+                
+            dense_data.append({
+                "Xu Hướng": row['Xu_Huong'],
+                "Ticket ID": row['ticket_id'],
+                "Symbol": f"{max_sym} ({get_symbol_name(max_sym)})",
+                "Số Lượng Hiện": max_c,
+                "Hệ Số (x)": ratio,
+                "Loại Win": win_type,
+                "Nhận Xét": implication
+            })
+    return pd.DataFrame(dense_data)
+
+def analyze_symbol_frequency(df_combined):
+    print("   + Phân tích Tần Suất Symbol...")
+    result_list = []
+    for trend in df_combined['Xu_Huong'].unique():
+        subset = df_combined[df_combined['Xu_Huong'] == trend]
+        counter = Counter()
+        total_cells = 0
+        for _, row in subset.iterrows():
+            matrix = parse_full_matrix(row['result_matrix'])
+            if matrix:
+                ids = [x['id'] for x in matrix if x['is_visible'] and x['id'] > 0]
+                counter.update(ids)
+                total_cells += len(ids)
+        
+        for sid, cnt in counter.most_common(15):
+            result_list.append({
+                "Xu Hướng": trend,
+                "Symbol": f"{sid} ({get_symbol_name(sid)})",
+                "Số Lần": cnt,
+                "Tỷ Lệ (%)": (cnt / total_cells * 100) if total_cells else 0
+            })
+    return pd.DataFrame(result_list)
+
+def analyze_multiplier_efficiency(df_combined):
+    print("   + Phân tích hiệu suất Multiplier...")
+    stats = []
+    for trend in df_combined['Xu_Huong'].unique():
+        subset = df_combined[df_combined['Xu_Huong'] == trend]
+        total_spins = len(subset)
+        for mul in CONFIG['TARGET_MULTIPLIERS']:
+            mul_hits = subset[(subset['calc_multiplier'] >= mul) & (subset['calc_multiplier'] < mul + 1)]
+            count = len(mul_hits)
+            avg_win_amt = mul_hits['total_win'].mean() if count > 0 else 0
+            avg_bet_amt = mul_hits['effective_bet'].mean() if count > 0 else 0
+            efficiency = (avg_win_amt / avg_bet_amt * 100) if avg_bet_amt > 0 else 0
+            stats.append({
+                "Xu Hướng": trend,
+                "Mức Nhân": f"x{mul}",
+                "Số Lần": count,
+                "Tần Suất (%)": (count / total_spins * 100) if total_spins else 0,
+                "Tiền Win TB": avg_win_amt,
+                "Hiệu Suất (%)": efficiency
+            })
+    return pd.DataFrame(stats)
+
+# ==============================================================================
+# MAIN EXECUTION
+# ==============================================================================
+if __name__ == "__main__":
+    df_raw = load_and_prep_data()
+    
+    if df_raw is not None and not df_raw.empty:
+        df_bw, df_low = extract_comparative_data(df_raw)
+        
+        if df_bw.empty and df_low.empty:
+            print("❌ Không tìm thấy dữ liệu mẫu.")
+        else:
+            df_combined = pd.concat([df_bw, df_low])
+            print("\n[3/5] BẮT ĐẦU PHÂN TÍCH CHI TIẾT...")
+            
+            df_report_mul = analyze_multiplier_efficiency(df_combined)
+            df_report_block = analyze_blocked_wins(df_combined)
+            df_report_dense = analyze_fake_wins(df_combined)
+            df_report_symbol = analyze_symbol_frequency(df_combined)
+            
+            print(f"\n[4/5] ĐANG XUẤT BÁO CÁO RA FILE: {CONFIG['OUTPUT_REPORT_PATH']}")
+            try:
+                with pd.ExcelWriter(CONFIG['OUTPUT_REPORT_PATH'], engine='openpyxl') as writer:
+                    df_report_mul.to_excel(writer, sheet_name='Hieu_Suat_Multiplier', index=False)
+                    df_report_block.to_excel(writer, sheet_name='Keo_Bi_Chan_Hang_1', index=False)
+                    df_report_dense.to_excel(writer, sheet_name='Thang_Ao_vs_That', index=False)
+                    df_report_symbol.to_excel(writer, sheet_name='Tan_Suat_Symbol', index=False)
+                    
+                print("\n[5/5] ✅ PHÂN TÍCH HOÀN TẤT!")
+                print(f"-> Mở file '{CONFIG['OUTPUT_REPORT_PATH']}' để xem kết quả.")
+                print("-> Sheet 'Keo_Bi_Chan_Hang_1' sẽ hiển thị các ván có >= 12 symbol giống nhau ở dưới nhưng bị chặn.")
+                
+            except Exception as e:
+                print(f"❌ Lỗi khi xuất file Excel: {e}")

@@ -1,0 +1,52 @@
+modules = ["nodejs-20", "python-3.11", "web", "postgresql-16"]
+run = "npm run dev"
+hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
+
+[nix]
+channel = "stable-25_05"
+packages = ["alsa-lib", "at-spi2-atk", "at-spi2-core", "atk", "cairo", "cups", "dbus", "ffmpeg", "freetype", "gdk-pixbuf", "gitFull", "glibcLocales", "gtk3", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "libxkbcommon", "mesa", "nspr", "nss", "openjpeg", "pango", "playwright-driver", "tcl", "tk", "xorg.libX11", "xorg.libXcomposite", "xorg.libXdamage", "xorg.libXfixes", "xorg.libXrandr", "xorg.libxcb", "zlib", "xorg.libXext", "expat", "glib", "libdrm"]
+
+[deployment]
+deploymentTarget = "vm"
+build = ["npm", "run", "build"]
+run = ["npm", "run", "start"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[env]
+PORT = "5000"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
+[agent]
+integrations = ["javascript_database:1.0.0", "javascript_log_in_with_replit:1.0.0"]
+expertMode = true
+
+[userenv]
+
+[userenv.shared]
+DO_ENDPOINT = "https://sgp1.digitaloceanspaces.com"
+DO_BUCKET_NAME = "data-ld1"
+DO_BUCKET_NAME_1 = "datashop"
+DO_ENDPOINT_1 = "https://sgp1.digitaloceanspaces.com"

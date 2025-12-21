@@ -1,0 +1,29 @@
+[Pipeline] Excel-to-PNG completed for upload b12eb8ac-8a10-4800-8996-35b076b58ca5
+[Pipeline] Generated 110 images
+[Pipeline] Creating video from images...
+[Video] Creating video from images in: /home/runner/workspace/uploads/pipeline-output/b12eb8ac-8a10-4800-8996-35b076b58ca5/images
+[Video] Found 109 images to process
+[Video] Running FFmpeg command: ffmpeg -y -f concat -safe 0 -i "/home/runner/workspace/uploads/pipeline-output/b12eb8ac-8a10-4800-8996-35b076b58ca5/images/image-list.txt" -vf "scale=1280x720:force_original_aspect_ratio=decrease,pad=1280x720:(ow-iw)/2:(oh-ih)/2,setsar=1" -c:v libx264 -pix_fmt yuv420p -preset medium -crf 23 -movflags +faststart "/home/runner/workspace/uploads/pipeline-output/b12eb8ac-8a10-4800-8996-35b076b58ca5/video.mp4"
+[Video] FFmpeg error: Error: Command failed: ffmpeg -y -f concat -safe 0 -i "/home/runner/workspace/uploads/pipeline-output/b12eb8ac-8a10-4800-8996-35b076b58ca5/images/image-list.txt" -vf "scale=1280x720:force_original_aspect_ratio=decrease,pad=1280x720:(ow-iw)/2:(oh-ih)/2,setsar=1" -c:v libx264 -pix_fmt yuv420p -preset medium -crf 23 -movflags +faststart "/home/runner/workspace/uploads/pipeline-output/b12eb8ac-8a10-4800-8996-35b076b58ca5/video.mp4"
+/bin/sh: 1: ffmpeg: not found
+
+    at genericNodeError (node:internal/errors:984:15)
+    at wrappedFn (node:internal/errors:538:14)
+    at ChildProcess.exithandler (node:child_process:422:12)
+    at ChildProcess.emit (node:events:524:28)
+    at maybeClose (node:internal/child_process:1104:16)
+    at Socket.<anonymous> (node:internal/child_process:456:11)
+    at Socket.emit (node:events:524:28)
+    at Pipe.<anonymous> (node:net:343:12) {
+  code: 127,
+  killed: false,
+  signal: null,
+  cmd: 'ffmpeg -y -f concat -safe 0 -i "/home/runner/workspace/uploads/pipeline-output/b12eb8ac-8a10-4800-8996-35b076b58ca5/images/image-list.txt" -vf "scale=1280x720:force_original_aspect_ratio=decrease,pad=1280x720:(ow-iw)/2:(oh-ih)/2,setsar=1" -c:v libx264 -pix_fmt yuv420p -preset medium -crf 23 -movflags +faststart "/home/runner/workspace/uploads/pipeline-output/b12eb8ac-8a10-4800-8996-35b076b58ca5/video.mp4"',
+  stdout: '',
+  stderr: '/bin/sh: 1: ffmpeg: not found\n'
+}
+[Pipeline] Video/DRM processing failed: Error: Failed to create video: Command failed: ffmpeg -y -f concat -safe 0 -i "/home/runner/workspace/uploads/pipeline-output/b12eb8ac-8a10-4800-8996-35b076b58ca5/images/image-list.txt" -vf "scale=1280x720:force_original_aspect_ratio=decrease,pad=1280x720:(ow-iw)/2:(oh-ih)/2,setsar=1" -c:v libx264 -pix_fmt yuv420p -preset medium -crf 23 -movflags +faststart "/home/runner/workspace/uploads/pipeline-output/b12eb8ac-8a10-4800-8996-35b076b58ca5/video.mp4"
+/bin/sh: 1: ffmpeg: not found
+
+    at ImageToVideoService.createVideoFromImages (/home/runner/workspace/server/services/drm/imageToVideo.ts:90:13)
+    at async processAdminUpload (/home/runner/workspace/server/pipeline/runner.ts:143:7)

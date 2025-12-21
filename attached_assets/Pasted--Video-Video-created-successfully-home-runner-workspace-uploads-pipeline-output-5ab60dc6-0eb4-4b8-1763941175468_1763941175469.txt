@@ -1,0 +1,40 @@
+[Video] Video created successfully: /home/runner/workspace/uploads/pipeline-output/5ab60dc6-0eb4-4b85-85bc-9288e3619f10/video.mp4 (2271121 bytes)
+[Pipeline] Packaging video with DRM...
+[DRM] Starting DRM packaging for content: admin-5ab60dc6-0eb4-4b85-85bc-9288e3619f10
+[DRM] Fetching encryption key from Doverunner CPIX API...
+[CPIX] Error fetching encryption key: TypeError: fetch failed
+    at node:internal/deps/undici/undici:13510:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async DoverunnerCPIXClient.getEncryptionKey (/home/runner/workspace/server/services/drm/cpixClient.ts:25:24)
+    at async DRMPackagerService.packageWithDRM (/home/runner/workspace/server/services/drm/drmPackager.ts:45:25)
+    at async processAdminUpload (/home/runner/workspace/server/pipeline/runner.ts:155:25) {
+  [cause]: Error: getaddrinfo ENOTFOUND kms.doverunner.com
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'kms.doverunner.com'
+  }
+}
+[Pipeline] Video/DRM processing failed: TypeError: fetch failed
+    at node:internal/deps/undici/undici:13510:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async DoverunnerCPIXClient.getEncryptionKey (/home/runner/workspace/server/services/drm/cpixClient.ts:25:24)
+    at async DRMPackagerService.packageWithDRM (/home/runner/workspace/server/services/drm/drmPackager.ts:45:25)
+    at async processAdminUpload (/home/runner/workspace/server/pipeline/runner.ts:155:25) {
+  [cause]: Error: getaddrinfo ENOTFOUND kms.doverunner.com
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'kms.doverunner.com'
+  }
+}
+[Pipeline] Cleanup: Deleted partial video file
+11:38:40 PM [express] GET /api/auth/user 401 in 314ms :: {"message":"Unauthorized"}
+11:38:40 PM [express] GET /api/auth/user 200 in 915ms :: {"id":"47369284","email":"yifeng260688@gmail…
+11:38:50 PM [express] GET /api/auth/user 304 in 473ms :: {"id":"47369284","email":"yifeng260688@gmail…
+11:38:59 PM [express] GET /api/auth/user 304 in 1972ms :: {"id":"47369284","email":"yifeng260688@gmai…
+11:39:10 PM [express] GET /api/auth/user 304 in 479ms :: {"id":"47369284","email":"yifeng260688@gmail…
+11:39:11 PM [express] GET /api/admin/uploads 200 in 725ms :: [{"id":"5ab60dc6-0eb4-4b85-85bc-9288e361…
+^C
