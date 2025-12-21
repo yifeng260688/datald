@@ -11,26 +11,44 @@ export function setStorage(s: any) {
 }
 
 export function getSession(mongoConnected: boolean) {
-  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const sessionStore = createSessionStore(mongoConnected);
+  const sessionTtl = 24 * 60 * 60 * 1000; // 1 day (Giảm xuống 1 ngày cho nhẹ DB)
   const isProduction = process.env.NODE_ENV === 'production';
   
-  return session({
-    secret: process.env.SESSION_SECRET!,
-    store: sessionStore,
+  // Cấu hình cơ bản
+  const sessionConfig: session.SessionOptions = {
+    secret: process.env.SESSION_SECRET || "default_secret_key_change_me",
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: isProduction, // Only use secure cookies in production (HTTPS)
-      sameSite: isProduction ? 'none' : 'lax', // 'none' for cross-site in production, 'lax' for development
+      // QUAN TRỌNG: Trên Vultr (HTTPS) bắt buộc true. Local (HTTP) là false.
+      secure: isProduction, 
+      // QUAN TRỌNG: 'lax' là tốt nhất cho OAuth redirect cùng domain
+      sameSite: 'lax', 
       maxAge: sessionTtl,
     },
-  });
+  };
+
+  // Logic chọn nơi lưu Session (Mongo vs Memory)
+  if (mongoConnected) {
+    try {
+      console.log("[Session] Attempting to use MongoDB Store");
+      sessionConfig.store = createSessionStore(mongoConnected);
+    } catch (err) {
+      console.error("[Session] Failed to create MongoStore, falling back to MemoryStore", err);
+      // Không gán store -> Mặc định dùng MemoryStore
+    }
+  } else {
+    console.log("[Session] MongoDB not connected, using MemoryStore (Sessions will reset on restart)");
+  }
+  
+  return session(sessionConfig);
 }
 
 export async function setupGoogleAuth(app: Express, mongoConnected: boolean) {
+  // QUAN TRỌNG: Dòng này giúp Express nhận diện HTTPS từ Nginx
   app.set("trust proxy", 1);
+  
   app.use(getSession(mongoConnected));
   app.use(passport.initialize());
   app.use(passport.session());
@@ -39,19 +57,20 @@ export async function setupGoogleAuth(app: Express, mongoConnected: boolean) {
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
   if (!clientID || !clientSecret) {
-    console.error("[GoogleAuth] Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET");
+    console.error("[GoogleAuth] Missing credentials");
     throw new Error("Google OAuth credentials not configured");
   }
 
-  // Build callback URL dynamically based on environment
-  const port = process.env.PORT || '5000';
-  const host = process.env.HOST || 'localhost';
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+  // --- SỬA LỖI URL ---
+  // Ưu tiên dùng BASE_URL từ .env (VD: https://datald.com)
+  // Nếu không có mới tự build (nhưng bỏ port đi nếu là production)
+  const baseUrl = process.env.BASE_URL || (
+    process.env.NODE_ENV === 'production' 
+      ? `https://${process.env.HOST || 'localhost'}` 
+      : `http://${process.env.HOST || 'localhost'}:${process.env.PORT || 5000}`
+  );
   
-  // Use GOOGLE_CALLBACK_URL if set, otherwise build from current config
-  const callbackURL = process.env.GOOGLE_CALLBACK_URL || 
-    `${protocol}://${host}:${port}/api/auth/google/callback`;
-
+  const callbackURL = `${baseUrl}/api/auth/google/callback`;
   console.log(`[GoogleAuth] Callback URL configured: ${callbackURL}`);
 
   passport.use(
@@ -64,18 +83,13 @@ export async function setupGoogleAuth(app: Express, mongoConnected: boolean) {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
+          // Logic xử lý user giữ nguyên
           const email = profile.emails?.[0]?.value || null;
           const firstName = profile.name?.givenName || null;
           const lastName = profile.name?.familyName || null;
           const profileImageUrl = profile.photos?.[0]?.value || null;
 
-          console.log("[GoogleAuth] User logged in:", {
-            id: profile.id,
-            email,
-            firstName,
-            lastName,
-          });
-
+          // Lưu vào DB
           const user = await storage.upsertUser({
             id: profile.id,
             email,
@@ -84,7 +98,9 @@ export async function setupGoogleAuth(app: Express, mongoConnected: boolean) {
             profileImageUrl,
           });
 
+          // Tạo object session gọn nhẹ hơn
           const sessionUser = {
+            id: profile.id, // Quan trọng nhất để serialize
             claims: {
               sub: profile.id,
               email,
@@ -92,9 +108,8 @@ export async function setupGoogleAuth(app: Express, mongoConnected: boolean) {
               last_name: lastName,
               profile_image_url: profileImageUrl,
             },
-            access_token: accessToken,
-            refresh_token: refreshToken,
-            expires_at: Math.floor(Date.now() / 1000) + 3600,
+            // Chỉ lưu token nếu thực sự cần dùng để gọi Google API sau này
+            // access_token: accessToken, 
           };
 
           done(null, sessionUser);
@@ -106,8 +121,14 @@ export async function setupGoogleAuth(app: Express, mongoConnected: boolean) {
     )
   );
 
-  passport.serializeUser((user: Express.User, cb) => cb(null, user));
-  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+  // Serialize: Chỉ lưu ID hoặc object nhỏ gọn
+  passport.serializeUser((user: any, cb) => {
+    cb(null, user);
+  });
+
+  passport.deserializeUser((user: any, cb) => {
+    cb(null, user);
+  });
 
   app.get(
     "/api/auth/google",
@@ -123,7 +144,11 @@ export async function setupGoogleAuth(app: Express, mongoConnected: boolean) {
       failureRedirect: "/?error=auth_failed",
     }),
     (req, res) => {
-      res.redirect("/");
+      // Login thành công -> Lưu session -> Redirect
+      req.session.save((err) => {
+        if (err) console.error("Session save error:", err);
+        res.redirect("/");
+      });
     }
   );
 
@@ -142,11 +167,8 @@ export async function setupGoogleAuth(app: Express, mongoConnected: boolean) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  const user = req.user as any;
-
-  if (!req.isAuthenticated() || !user) {
-    return res.status(401).json({ message: "Unauthorized" });
+  if (req.isAuthenticated()) {
+    return next();
   }
-
-  return next();
+  res.status(401).json({ message: "Unauthorized" });
 };
