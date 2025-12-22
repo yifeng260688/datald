@@ -202,6 +202,9 @@ server.listen(port, host, () => {
   initializeApp();
 });
 
+/ --- THÊM DÒNG NÀY ĐỂ TĂNG TIMEOUT NODEJS ---
+server.timeout = 1200000;
+
 async function initializeApp() {
   try {
     log("Initializing application...");
