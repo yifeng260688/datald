@@ -309,7 +309,7 @@ const UserUploadSchema = new Schema<IUserUpload>({
   filePath: { type: String, required: true },
   fileSize: { type: Number, required: true },
   fileHash: { type: String, index: true },
-  category?: string, // Danh mục user chọn lúc upload
+  category: { type: String, default: "" },
   approvalStatus: { 
     type: String, 
     enum: ["pending", "approved", "rejected"], 
