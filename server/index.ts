@@ -157,6 +157,9 @@ if (isProduction) {
     
     // Catch-all for SPA routing - but only for HTML requests
     app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api')) {
+      return next();
+      }
       const accept = req.headers.accept || '';
       if (accept.includes('text/html')) {
         res.sendFile(path.resolve(distPath, "index.html"));
