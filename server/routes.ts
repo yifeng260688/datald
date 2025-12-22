@@ -1047,7 +1047,9 @@ export async function registerRoutes(app: Express, server?: Server): Promise<Ser
     try {
       const userId = req.user.claims.sub;
       const file = req.file;
-
+      // --- THÊM DÒNG NÀY: Lấy category từ request body ---
+      const { category } = req.body;
+      
       // Check if user is blocked
       const user = await storage.getUser(userId);
       if (user?.isBlocked) {
@@ -1101,6 +1103,7 @@ export async function registerRoutes(app: Express, server?: Server): Promise<Ser
         filePath: file.path,
         fileSize: file.size,
         fileHash: fileHash,
+         category: category || "", // Lưu vào DB (nếu không có thì để chuỗi rỗng)
       };
 
       // Validate using Zod schema (will throw if invalid)
