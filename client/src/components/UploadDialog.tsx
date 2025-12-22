@@ -79,6 +79,8 @@ export function UploadDialog() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("file", file);
+       // Nếu user chọn rồi thì gửi, nếu chưa chọn thì gửi chuỗi rỗng
+      formData.append("category", selectedCategory || ""); 
 
       setUploadProgress(10);
 
@@ -161,6 +163,16 @@ export function UploadDialog() {
 
   const handleConfirmUpload = () => {
     if (!selectedFile) return;
+     // --- THÊM ĐOẠN NÀY NẾU MUỐN BẮT BUỘC CHỌN DANH MỤC ---
+    if (!selectedCategory) {
+      toast({
+        title: "Thiếu thông tin",
+        description: "Vui lòng chọn danh mục dữ liệu trước khi đăng.",
+        variant: "destructive",
+      });
+      return;
+    }
+    // ------------------------------------------------------
     uploadMutation.mutate(selectedFile);
   };
 
