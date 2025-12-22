@@ -76,6 +76,12 @@ export const documentTags = pgTable("document_tags", {
 
 // User uploads table
 export const userUploads = pgTable("user_uploads", {
+  // ... các trường cũ ...
+  fileHash: text("file_hash"),
+  // --- THÊM DÒNG NÀY ---
+  category: text("category"), // Lưu danh mục user chọn
+  // ---------------------
+  createdAt: timestamp("created_at").defaultNow(),
   id: varchar("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   slot: integer("slot").notNull(),
