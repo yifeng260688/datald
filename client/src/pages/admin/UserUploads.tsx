@@ -224,6 +224,7 @@ export default function AdminUserUploads() {
                 <TableRow>
                   <TableHead>User</TableHead>
                   <TableHead>Filename</TableHead>
+                  <TableHead>Danh mục (User)</TableHead>
                   <TableHead>Kích thước</TableHead>
                   <TableHead>Ngày upload</TableHead>
                   <TableHead>Trạng thái</TableHead>
@@ -281,6 +282,11 @@ export default function AdminUserUploads() {
                           </div>
                         </div>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-normal">
+                        {upload.category || "Chưa chọn"}
+                      </Badge>
                     </TableCell>
                     <TableCell data-testid={`text-filesize-${upload.id}`}>
                       {formatFileSize(upload.fileSize)}
