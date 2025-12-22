@@ -73,6 +73,7 @@ export interface IUserUpload extends Document {
   filePath: string;
   fileSize: number;
   fileHash?: string;
+  category?: string;
   approvalStatus: "pending" | "approved" | "rejected";
   reviewedBy?: string;
   reviewedAt?: Date;
