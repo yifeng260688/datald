@@ -999,13 +999,15 @@ export class MongoDBStorage implements IStorage {
 
   // User upload approval operations
   async getAllUserUploads(): Promise<(UserUploadType & { userName: string; userEmail: string })[]> {
+    // Lấy tất cả upload, sắp xếp mới nhất lên đầu
     const uploads = await UserUpload.find()
       .sort({ uploadedAt: -1 });
-    
-    // Fetch user details for each upload
+       
+    // Lấy thông tin user cho từng upload
     const result = [];
     for (const upload of uploads) {
       const user = await User.findById(upload.userId);
+      
       result.push({
         id: upload._id,
         userId: upload.userId,
@@ -1014,6 +1016,13 @@ export class MongoDBStorage implements IStorage {
         fileType: upload.fileType,
         filePath: upload.filePath,
         fileSize: upload.fileSize,
+        
+        // --- CÁC DÒNG MỚI ĐƯỢC THÊM ---
+        fileHash: toNull(upload.fileHash),
+        // Lấy category từ DB, nếu không có thì fallback về "Chưa chọn"
+        category: upload.category || (upload as any).category || "Chưa chọn",
+        // -------------------------------
+
         approvalStatus: upload.approvalStatus,
         reviewedBy: toNull(upload.reviewedBy),
         reviewedAt: toNull(upload.reviewedAt),
