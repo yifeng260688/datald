@@ -1197,8 +1197,8 @@ export async function registerRoutes(app: Express, server?: Server): Promise<Ser
             filePath: file.path,
             fileSize: file.size,
             fileHash: fileHash,
-            category: category,
-            subcategory: subcategory,
+            category: category || "Chưa chọn",
+            subcategory: subcategory,            
           });
 
           uploads.push(upload);
