@@ -746,10 +746,15 @@ export class MongoDBStorage implements IStorage {
     return null;
   }
 
-  async createUserUpload(upload: InsertUserUpload): Promise<UserUploadType> {
+ async createUserUpload(upload: InsertUserUpload): Promise<UserUploadType> {
+    // [DEBUG] In ra để chắc chắn server nhận được category
+    console.log("Creating Mongo Upload with data:", upload);
+
     const newUpload = await UserUpload.create({
       _id: randomUUID(),
       ...upload,
+      // Fallback: Nếu trong ...upload bị thiếu category thì lấy từ any hoặc gán mặc định
+      category: (upload as any).category || "Chưa chọn"
     });
     
     return {
@@ -760,6 +765,10 @@ export class MongoDBStorage implements IStorage {
       fileType: newUpload.fileType,
       filePath: newUpload.filePath,
       fileSize: newUpload.fileSize,
+      // --- BỔ SUNG QUAN TRỌNG: TRẢ VỀ DỮ LIỆU ĐỂ HIỂN THỊ ---
+      fileHash: toNull(newUpload.fileHash), 
+      category: newUpload.category || "Chưa chọn", 
+      // -----------------------------------------------------
       approvalStatus: newUpload.approvalStatus,
       reviewedBy: toNull(newUpload.reviewedBy),
       reviewedAt: toNull(newUpload.reviewedAt),
