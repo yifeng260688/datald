@@ -78,9 +78,9 @@ export function UploadDialog() {
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
+             // Nếu user chọn rồi thì gửi, nếu chưa chọn thì gửi chuỗi rỗng
+      formData.append("category", selectedCategory || "");       
       formData.append("file", file);
-       // Nếu user chọn rồi thì gửi, nếu chưa chọn thì gửi chuỗi rỗng
-      formData.append("category", selectedCategory || ""); 
 
       setUploadProgress(10);
 
