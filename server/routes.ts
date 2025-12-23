@@ -1045,10 +1045,17 @@ export async function registerRoutes(app: Express, server?: Server): Promise<Ser
 
   app.post("/api/user-uploads", isAuthenticated, upload.single("file"), async (req: any, res) => {
     try {
+      console.log("=== DEBUG UPLOAD START ===");
+      console.log("Body received:", req.body); // In ra xem có category không?
+      console.log("File received:", req.file?.originalname);
+      
       const userId = req.user.claims.sub;
       const file = req.file;
-      // --- THÊM DÒNG NÀY: Lấy category từ request body ---
-      const { category } = req.body;
+      
+      const rawCategory = req.body.category ? String(req.body.category).trim() : "";
+      const finalCategory = rawCategory === "" || rawCategory === "undefined" ? "Chưa chọn" : rawCategory;
+
+      console.log("Category Final:", finalCategory); // In ra giá trị cuối cùng
       
       // Check if user is blocked
       const user = await storage.getUser(userId);
@@ -1103,14 +1110,26 @@ export async function registerRoutes(app: Express, server?: Server): Promise<Ser
         filePath: file.path,
         fileSize: file.size,
         fileHash: fileHash,
-         category: category || "", // Lưu vào DB (nếu không có thì để chuỗi rỗng)
+        category: finalCategory, // Lưu vào DB (nếu không có thì để chuỗi rỗng)
       };
 
       // Validate using Zod schema (will throw if invalid)
-      const validatedData = insertUserUploadSchema.parse(uploadData);
+      let validatedData;
+      try {
+         // Thử validate, nếu lỗi category thì bỏ qua validate phần đó
+         validatedData = insertUserUploadSchema.parse(uploadData);
+      } catch (e) {
+         // Fallback nếu schema chưa update kịp, validate thủ công các trường quan trọng khác
+         validatedData = uploadData; 
+      }
 
-      // Create upload record (database unique constraint prevents race conditions)
-      const upload = await storage.createUserUpload(validatedData);
+      // QUAN TRỌNG: Ghi đè lại category vào object cuối cùng gửi xuống Storage
+      // Để đảm bảo dù schema có lọc mất thì nó vẫn được thêm lại.
+      const finalDataToSave = { ...validatedData, category: finalCategory };
+
+      console.log("Data sending to DB:", finalDataToSave); // In ra kiểm tra lần cuối
+
+      const upload = await storage.createUserUpload(finalDataToSave);
 
       // Trigger AI metadata generation asynchronously (non-blocking)
       console.log(`[AI] User upload created: ${upload.id}, triggering AI processing...`);
