@@ -5,83 +5,20 @@ import { createRequire } from "module";
 import { uploadToSpaces, generateFolderName, uploadOriginalToArchive } from "../services/doSpaces";
 import xlsx from "xlsx";
 
-// pdf-parse v2.4.5+ - lazy load function to handle ESM/CommonJS compatibility
-let pdfParseCache: any = null;
+// --- PHẦN FIX LỖI PDF-PARSE (Đơn giản hóa) ---
+const require = createRequire(import.meta.url);
+const pdfParseLib = require("pdf-parse");
 
 async function getPdfParse(): Promise<any> {
-  if (pdfParseCache) {
-    return pdfParseCache;
+  // Lấy hàm parser chuẩn xác
+  const parser = pdfParseLib.default || pdfParseLib;
+  
+  if (typeof parser !== 'function') {
+    console.error(`[pdfParse] Critical Error: Loaded library is ${typeof parser}, expected function.`);
+    throw new Error('pdf-parse library structure mismatch: not a function');
   }
   
-  try {
-    // Try dynamic import first (for ESM)
-    const pdfParseModule = await import("pdf-parse");
-    // pdf-parse v2.4.5+ exports as default function
-    if (typeof pdfParseModule.default === 'function') {
-      pdfParseCache = pdfParseModule.default;
-    } else if (typeof pdfParseModule === 'function') {
-      pdfParseCache = pdfParseModule;
-    } else {
-      // Try to find function in module
-      const funcKeys = Object.keys(pdfParseModule).filter(key => typeof pdfParseModule[key] === 'function');
-      if (funcKeys.length > 0) {
-        pdfParseCache = pdfParseModule[funcKeys[0]];
-      } else {
-        throw new Error('Could not find pdfParse function in ESM module');
-      }
-    }
-    return pdfParseCache;
-  } catch (e) {
-    // Fallback to require (for CommonJS)
-    const require = createRequire(import.meta.url);
-    const pdfParseModule = require("pdf-parse");
-    
-    console.log('[pdfParse] Module type:', typeof pdfParseModule);
-    console.log('[pdfParse] Module keys:', Object.keys(pdfParseModule).slice(0, 15));
-    
-    // Handle different export formats
-    if (typeof pdfParseModule === 'function') {
-      pdfParseCache = pdfParseModule;
-      console.log('[pdfParse] Using direct function export');
-    } else if (pdfParseModule.default && typeof pdfParseModule.default === 'function') {
-      pdfParseCache = pdfParseModule.default;
-      console.log('[pdfParse] Using default export');
-    } else if (pdfParseModule.pdfParse && typeof pdfParseModule.pdfParse === 'function') {
-      pdfParseCache = pdfParseModule.pdfParse;
-      console.log('[pdfParse] Using named pdfParse export');
-    } else {
-      // Try to find the function in the module - look for async functions first
-      const allFuncs = Object.keys(pdfParseModule).filter(key => typeof pdfParseModule[key] === 'function');
-      console.log('[pdfParse] Found functions:', allFuncs);
-      
-      // Filter for functions that might be the parser (usually async functions)
-      const asyncFuncs = allFuncs.filter(key => {
-        const fn = pdfParseModule[key];
-        return fn.constructor.name === 'AsyncFunction' || fn.length > 0; // AsyncFunction or takes parameters
-      });
-      
-      if (asyncFuncs.length > 0) {
-        pdfParseCache = pdfParseModule[asyncFuncs[0]];
-        console.log(`[pdfParse] Using async function: ${asyncFuncs[0]}`);
-      } else if (allFuncs.length > 0) {
-        pdfParseCache = pdfParseModule[allFuncs[0]];
-        console.log(`[pdfParse] Using first function: ${allFuncs[0]}`);
-      } else {
-        // Last resort: check if module itself is callable
-        console.error('[pdfParse] Module structure:', Object.keys(pdfParseModule).slice(0, 10));
-        throw new Error(`Could not find pdfParse function. Module type: ${typeof pdfParseModule}, Keys: ${Object.keys(pdfParseModule).slice(0, 5).join(', ')}`);
-      }
-    }
-    
-    // Verify it's actually a function
-    if (typeof pdfParseCache !== 'function') {
-      console.error('[pdfParse] Cache type:', typeof pdfParseCache);
-      throw new Error(`pdfParse is not a function, got: ${typeof pdfParseCache}`);
-    }
-    
-    console.log('[pdfParse] Successfully loaded pdfParse function');
-    return pdfParseCache;
-  }
+  return parser;
 }
 
 const PIPELINE_DIR = path.join(process.cwd(), "server", "pipeline");
