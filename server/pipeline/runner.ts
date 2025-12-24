@@ -9,33 +9,24 @@ import xlsx from "xlsx";
 // Dùng import sao (*) để lấy toàn bộ module
 import * as pdfParseModule from "pdf-parse";
 
+// --- HÀM FIX LỖI MẠNH NHẤT (Dùng eval require) ---
 async function getPdfParse(): Promise<any> {
-  const lib = pdfParseModule as any;
-  
-  // In ra Log để debug nếu vẫn lỗi
-  console.log("[PdfDebug] Typeof lib:", typeof lib);
-  if (typeof lib === 'object') console.log("[PdfDebug] Keys:", Object.keys(lib));
-
-  // Chiến thuật 1: Gọi trực tiếp (nếu là function)
-  if (typeof lib === 'function') return lib;
-
-  // Chiến thuật 2: Lấy .default
-  if (lib.default && typeof lib.default === 'function') return lib.default;
-
-  // Chiến thuật 3: Lấy .default.default (Trường hợp bundle lồng nhau)
-  if (lib.default && lib.default.default && typeof lib.default.default === 'function') return lib.default.default;
-
-  // Chiến thuật 4: Cứu cánh bằng Native Require (Bỏ qua trình biên dịch)
   try {
-    const require = createRequire(import.meta.url);
-    const nativeLib = require("pdf-parse");
-    if (typeof nativeLib === 'function') return nativeLib;
-    if (nativeLib.default && typeof nativeLib.default === 'function') return nativeLib.default;
-  } catch (e) {
-    console.error("[PdfDebug] Native require failed:", e);
-  }
+    // 1. Dùng eval("require") để qua mặt trình biên dịch (Vite/Esbuild)
+    // Server sẽ buộc phải load file gốc từ thư mục node_modules
+    const runtimeRequire = eval("require"); 
+    
+    const lib = runtimeRequire("pdf-parse");
+    
+    // 2. Log ra để kiểm chứng
+    console.log("[PdfDebug] Loaded via eval(require):", typeof lib);
 
-  throw new Error(`CRITICAL: Cannot find pdfParse function. Lib content keys: ${Object.keys(lib).join(', ')}`);
+    // 3. Trả về hàm xử lý
+    return lib.default || lib;
+  } catch (e: any) {
+    console.error("[PdfDebug] Eval require failed:", e);
+    throw new Error(`Critical: Failed to load pdf-parse via runtime. Error: ${e.message}`);
+  }
 }
 
 const PIPELINE_DIR = path.join(process.cwd(), "server", "pipeline");
