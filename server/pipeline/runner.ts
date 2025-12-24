@@ -1,24 +1,41 @@
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs/promises";
+// Thêm import createRequire để fallback nếu cần
 import { createRequire } from "module";
 import { uploadToSpaces, generateFolderName, uploadOriginalToArchive } from "../services/doSpaces";
 import xlsx from "xlsx";
 
-// --- PHẦN FIX LỖI PDF-PARSE (Đơn giản hóa) ---
-const require = createRequire(import.meta.url);
-const pdfParseLib = require("pdf-parse");
+// Dùng import sao (*) để lấy toàn bộ module
+import * as pdfParseModule from "pdf-parse";
 
 async function getPdfParse(): Promise<any> {
-  // Lấy hàm parser chuẩn xác
-  const parser = pdfParseLib.default || pdfParseLib;
+  const lib = pdfParseModule as any;
   
-  if (typeof parser !== 'function') {
-    console.error(`[pdfParse] Critical Error: Loaded library is ${typeof parser}, expected function.`);
-    throw new Error('pdf-parse library structure mismatch: not a function');
+  // In ra Log để debug nếu vẫn lỗi
+  console.log("[PdfDebug] Typeof lib:", typeof lib);
+  if (typeof lib === 'object') console.log("[PdfDebug] Keys:", Object.keys(lib));
+
+  // Chiến thuật 1: Gọi trực tiếp (nếu là function)
+  if (typeof lib === 'function') return lib;
+
+  // Chiến thuật 2: Lấy .default
+  if (lib.default && typeof lib.default === 'function') return lib.default;
+
+  // Chiến thuật 3: Lấy .default.default (Trường hợp bundle lồng nhau)
+  if (lib.default && lib.default.default && typeof lib.default.default === 'function') return lib.default.default;
+
+  // Chiến thuật 4: Cứu cánh bằng Native Require (Bỏ qua trình biên dịch)
+  try {
+    const require = createRequire(import.meta.url);
+    const nativeLib = require("pdf-parse");
+    if (typeof nativeLib === 'function') return nativeLib;
+    if (nativeLib.default && typeof nativeLib.default === 'function') return nativeLib.default;
+  } catch (e) {
+    console.error("[PdfDebug] Native require failed:", e);
   }
-  
-  return parser;
+
+  throw new Error(`CRITICAL: Cannot find pdfParse function. Lib content keys: ${Object.keys(lib).join(', ')}`);
 }
 
 const PIPELINE_DIR = path.join(process.cwd(), "server", "pipeline");
